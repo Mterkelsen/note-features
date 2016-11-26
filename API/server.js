@@ -241,7 +241,7 @@ router.post('/authenticate', function(req, res) {
           if (token) {
             var decoded = jwt.decode(token, config.secret);
             //find the user id of the token received
-            console.log('Her er dit lorte user id' + decoded._id)
+            console.log('Her er dit lorte user id ' + decoded._id)
           }
           var note = new Note(req.body);
           note.owner = decoded._id;
@@ -251,7 +251,6 @@ router.post('/authenticate', function(req, res) {
             if (err)
                 res.send(err);
             if (!err){
-
                   console.log(JSON.stringify(note, null, "\t"))
                   res.json({message:'Note created!'});
                 }
@@ -260,11 +259,19 @@ router.post('/authenticate', function(req, res) {
         })
 // GETTING NOTES
         .get(function(req, res){
-          Note.find(function(err, note){
+          //the request is sent with a JWT to identify the user
+          var token = getToken(req.headers);
+          //if there is a token then decrypt it
+          if (token) {
+            var decoded = jwt.decode(token, config.secret);
+            //find the user id of the token received
+            console.log('Her er dit lorte user id' + decoded._id)
+          }
+          Note.find(function(err, note){    
             if (err)
                 res.send(err);
             if (!err) {
-              Note.find({})
+              Note.find({owner: decoded._id})
               .exec(function(err, note) {console.log(JSON.stringify(note, null, "\t"))})
               res.json({message:'Notes received!'});
             }
